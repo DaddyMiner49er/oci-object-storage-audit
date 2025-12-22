@@ -210,7 +210,7 @@ pyrightconfig.json
 !.vscode/*.code-snippets
 
 # VS Code Workspace
-*.code-workspace
+# *.code-workspace
 
 # Local History for Visual Studio Code
 .history/
