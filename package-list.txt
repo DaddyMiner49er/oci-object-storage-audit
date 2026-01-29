@@ -1,0 +1,24 @@
+
+Name: certifi
+Required-by: oci
+Name: cffi
+Required-by: cryptography
+Name: circuitbreaker
+Required-by: oci
+Name: cryptography
+Required-by: oci, pyOpenSSL
+Name: oci
+Required-by: 
+Name: pip
+Required-by: 
+Name: pycparser
+Required-by: cffi
+Name: pyOpenSSL
+Required-by: oci
+Name: python-dateutil
+Required-by: oci
+Name: pytz
+Required-by: oci
+Name: six
+Required-by: python-dateutil
+

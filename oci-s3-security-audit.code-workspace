@@ -5,6 +5,27 @@
 		}
 	],
 	"settings": {
+		"terminal.integrated.profiles.linux":{
+			"bash": {
+				"path": "bash",
+				// "icon": "terminal-linux",
+				"icon": "terminal-bash"
+			},
+			"zsh": {
+				"path": "zsh"
+			},
+			"fish": {
+				"path": "fish"
+			},
+			"tmux": {
+				"path": "tmux",
+				"icon": "terminal-tmux"
+			},
+			"pwsh": {
+				"path": "pwsh",
+				"icon": "terminal-powershell"
+			}
+		},
 		"[python]": {
 			"diffEditor.ignoreTrimWhitespace": false,
 			"editor.codeActionsOnSave": {

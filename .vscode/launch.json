@@ -8,7 +8,20 @@
             "name": "Python Debugger: Python File",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}"
+            "program": "${file}",
+            "justMyCode": true,
+        },
+        {
+            "name": "Python Debugger: Current File with Custom Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            // "console": "integratedTerminal",
+            "program": "${file}",
+            "justMyCode": true,
+            "args": [
+                "--metaconfig",
+                "./config/metadata_config.json"
+            ],
         }
     ]
 }

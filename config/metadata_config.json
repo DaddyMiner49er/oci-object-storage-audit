@@ -1,0 +1,16 @@
+{
+    "datetime": "Audit Date Time",
+    "name": "Bucket Name",
+    "region": "Bucket Region",
+    "versioning": "Bucket Versioning",
+    "tagging": "Bucket Tagging",
+    "encryption": "Bucket Encryption",
+    "logging": "Bucket Logging",
+    "static_website": "Static Website",
+    "acl": "ACL",
+    "cors": "CORS",
+    "ownership_controls": "Ownership Controls",
+    "public_access": "Public Access",
+    "policy": "Policy",
+    "object_count": "Object Count"
+}
