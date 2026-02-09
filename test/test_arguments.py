@@ -1,15 +1,18 @@
 import unittest
 import sys, os
 
-my_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, my_path + '\\..\\')
+# my_path = os.path.dirname(os.path.abspath(__file__))
+# sys.path.insert(0, my_path + '\\..\\')
+
+# sys.path.insert(1, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(1, '/home/wsmith/dev/projects/oci-s3-security-audit')
 
 from oci_s3_security_audit import parse_args
 
 class TestArguments(unittest.TestCase):
 
     def test_prefix_region_mismatch(self):
-        sys.argv = ["oci_s3_security_audit.py", "--metaconfig", "..\\config\\metadata_config.json", "--prefix", "'-us'", "--region", "eu-central-1"]
+        sys.argv = ["oci_s3_security_audit.py", "--metaconfig", "..\\config\\metadata_config.json", "--prefix", "-us", "--region", "eu-central-1"]
         args = parse_args()
         self.assertTrue(("-us" in args.prefix and "eu-" in args.region) or ("-eu" in args.prefiix and "us-" in args.region), msg=f"Bucket prefix Region mismatch.")
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 import sys, os
-import oci
-import oci.config
 
 from oci.config import from_file
 from oci.logging import LoggingManagementClient
@@ -79,7 +77,6 @@ class TestAuditResults(unittest.TestCase):
     def test_policy(self):
         bucket_policy = oci_s3_security_audit.audit_object_lifecycle_policy(self.object_storage_client, self.bucket_name) 
         self.assertTrue(any(elem in bucket_policy for elem in ["NoPolicy", "Statement"]), msg=f"Bucket policy: elements ['NoPolicy', 'Statement'] and not ${ bucket_policy }.")
-
 
     def test_object_count(self):
         import numbers

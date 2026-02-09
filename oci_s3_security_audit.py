@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-from encodings import unicode_escape
-from faulthandler import is_enabled
-import os
-import argparse
 import sys
+import argparse
 import json
 import logging
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from pathlib import Path
 from unittest.mock import DEFAULT
@@ -17,6 +14,7 @@ import oci.config
 
 from oci.config import from_file
 from oci.logging import LoggingManagementClient
+from oci.loggingsearch import LogSearchClient
 from oci.object_storage import ObjectStorageClient
 from oci.exceptions import ServiceError, InvalidConfig
 from oci.identity import IdentityClient
@@ -127,12 +125,13 @@ audit_list:dict[str, str] = {
 # Configure logging
 # timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-log_filename="./"+OUTFILE_NAME+"_"+timestamp
+base_filename="./"+OUTFILE_NAME
+# +"_"+timestamp
 try:
-    logging.basicConfig(filename=log_filename+".log", filemode='w', format="%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.WARNING, force=True)
+    logging.basicConfig(filename=base_filename+".log", filemode='w', format="%(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.WARNING, force=True)
     logger = logging.getLogger(__name__)
 except PermissionError:
-    print(f"Error: Permission denied. Check if { log_filename } is open or in a protected folder.")
+    print(f"Error: Permission denied. Check if { base_filename }.log is open or in a protected folder.")
     exit(0)
 
 # Audit Functions
@@ -196,19 +195,27 @@ def audit_bucket_encryption(bucket):
     return result
 
 # Audit Bucket Logging
-def audit_bucket_logging(object_storage_client, namespace_name, bucket_name, prefix: Optional[str]):
+def audit_bucket_logging(bucket):
     
-    list_objects_response = object_storage_client.list_objects(
-        namespace_name=namespace_name, 
-        bucket_name = bucket_name, 
-        prefix = prefix
+    logging_search_client = oci.loggingsearch.LogSearchClient(config)
+
+    # Get SearchLogDetails
+    tenancy = config['tenancy']
+    oci_loggroup_id = "ocid1.loggroup.oc1.iad.amaaaaaavkyibziabnk5choatf4wrnqz2rcpwojnarfi2mgybusewxp2ma4q"
+    oci_log_id = "ocid1.log.oc1.iad.amaaaaaavkyibzia37sd2win7optj6kamouk4zdl5xne4e4piu5oj66qpa6a"
+    searchQuery = f"search \"{ config['tenancy'] }/{ oci_loggroup_id }\" | where level = 'INFO';\""
+    # searchQuery = f"search \"{ config['tenancy'] }/{ oci_loggroup_id }/{ oci_log_id }\" | where level = 'INFO';\""
+
+    days_to_subtract = timedelta(days=1)
+    search_details = oci.loggingsearch.models.SearchLogsDetails(
+        time_start=(datetime.now() - days_to_subtract).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        time_end=(datetime.now()).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        search_query = searchQuery, 
+        is_return_field_info = True
     )
-
-    bucket_logs = []
-    for bucket_log in list_objects_response.data.objects:
-        bucket_logs.append(bucket_log.name)
-
-    result = ' '.join(bucket_logs)
+    response = logging_search_client.search_logs(search_logs_details = search_details)
+    print(response.data)
+    result = ' '.join(response.data)
 
     return result
 
@@ -431,7 +438,7 @@ def audit_object_storage(object_storage_client, prefix, region_filter):
             bucket_dict.update({ "tagging": audit_bucket_tagging(bucket) })
             bucket_dict.update({ "encryption": audit_bucket_encryption(bucket) })
             bucket_dict.update({ "logging": audit_log_group_logging(bucket_name, prefix) })
-            # bucket_dict.update({ "logging": audit_bucket_logging(object_storage_client, namespace_name, bucket_name, prefix) })
+            # bucket_dict.update({ "logging": audit_bucket_logging(bucket) })
             bucket_dict.update({ "static_website": audit_bucket_website(bucket) })
             bucket_dict.update({ "acl": audit_bucket_acl(bucket) })
             bucket_dict.update({ "cors": audit_bucket_cors(bucket) })
@@ -557,7 +564,7 @@ def main():
     # Write results 
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     # json_filename="./"+OUTFILE_NAME+"_"+timestamp+".json"
-    with open(log_filename+".json", "w") as audit_file:
+    with open(base_filename+".json", "w") as audit_file:
         json.dump(audit_dict, audit_file)
     
     completed_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
